@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Wrist Note</string>
+    <string name="editor_description">Введите Markdown. Заголовки, списки и оформление будут адаптированы для VelaOS.</string>
+    <string name="markdown_label">Markdown</string>
+    <string name="markdown_placeholder"># Заметка\n\nТекст с **жирным**, *курсивом* и ~~зачёркиванием~~.\n\n- Первый пункт\n- Второй пункт\n\n> Короткая цитата\n\n`код`</string>
+    <string name="button_install">Отправить на часы</string>
+    <string name="button_building">Сборка…</string>
+    <string name="status_rpk_sent">RPK %1$s передан в Gadgetbridge</string>
+    <string name="error_gadgetbridge_not_found">Gadgetbridge 0.93+ не найден. Установите или обновите Gadgetbridge.</string>
+    <string name="error_gadgetbridge_security">Gadgetbridge запретил открытие установщика RPK.</string>
+    <string name="error_build_failed">Не удалось собрать RPK.</string>
+    <string name="error_enter_text">Введите текст для RPK.</string>
+    <string name="error_text_too_large">Текст превышает допустимый размер 1 МБ.</string>
+    <string name="error_invalid_rpk_template">Некорректный встроенный RPK-шаблон.</string>
+    <string name="markdown_image_default_alt">изображение</string>
+    <string name="markdown_image_label">Изображение</string>
+    <string name="format_heading">Заголовок</string>
+    <string name="format_bold">Жирный текст</string>
+    <string name="format_italic">Курсив</string>
+    <string name="format_strikethrough">Зачёркнутый текст</string>
+    <string name="format_code">Встроенный код</string>
+    <string name="format_bullet_list">Маркированный список</string>
+    <string name="format_numbered_list">Нумерованный список</string>
+    <string name="format_quote">Цитата</string>
+    <string name="format_horizontal_rule">Горизонтальная линия</string>
+</resources>

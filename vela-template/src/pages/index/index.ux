@@ -1,0 +1,158 @@
+<template>
+  <div class="page">
+    <scroll class="text-scroll" scroll-y="true" bounces="true">
+      <div class="document">
+        <text class="content {{ $item.type }}" for="{{ blocks }}">
+          <span class="{{ $item.style }}" for="{{ $item.segments }}">{{ $item.text }}</span>
+        </text>
+      </div>
+    </scroll>
+  </div>
+</template>
+
+<script>
+export default {
+  private: {
+    blocks: "__RPKER_MARKDOWN_BLOCKS__"
+  }
+}
+</script>
+
+<style>
+.page {
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  flex-direction: column;
+}
+
+.text-scroll {
+  width: 100%;
+  height: 100%;
+  padding: 36px;
+  flex-direction: column;
+}
+
+.document {
+  width: 100%;
+  flex-direction: column;
+}
+
+.content {
+  width: 100%;
+  color: #ffffff;
+  font-size: 52px;
+  line-height: 68px;
+  lines: -1;
+  flex-shrink: 0;
+  margin-bottom: 20px;
+}
+
+.heading1 {
+  font-size: 72px;
+  line-height: 86px;
+  font-weight: bold;
+  margin-bottom: 28px;
+}
+
+.heading2 {
+  font-size: 66px;
+  line-height: 80px;
+  font-weight: bold;
+  margin-bottom: 24px;
+}
+
+.heading3 {
+  font-size: 60px;
+  line-height: 74px;
+  font-weight: bold;
+  margin-bottom: 22px;
+}
+
+.list-item {
+  margin-bottom: 12px;
+}
+
+.quote {
+  color: #b8c0cc;
+  font-style: italic;
+}
+
+.code-block {
+  color: #ffd166;
+  background-color: #171b24;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 46px;
+  line-height: 62px;
+}
+
+.rule {
+  color: #7e8796;
+  text-align: center;
+}
+
+.strong {
+  font-weight: bold;
+}
+
+.emphasis {
+  font-style: italic;
+}
+
+.deleted {
+  text-decoration: line-through;
+}
+
+.code {
+  color: #ffd166;
+}
+
+.link {
+  color: #72a7ff;
+  text-decoration: underline;
+}
+
+@media screen and (shape: circle) {
+  .text-scroll {
+    padding-left: 72px;
+    padding-right: 72px;
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+}
+
+@media screen and (shape: pill-shaped) {
+  .text-scroll {
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 144px;
+    padding-bottom: 144px;
+  }
+
+  .content {
+    font-size: 60px;
+    line-height: 78px;
+  }
+
+  .heading1 {
+    font-size: 76px;
+    line-height: 90px;
+  }
+
+  .heading2 {
+    font-size: 72px;
+    line-height: 86px;
+  }
+
+  .heading3 {
+    font-size: 66px;
+    line-height: 80px;
+  }
+
+  .code-block {
+    font-size: 54px;
+    line-height: 72px;
+  }
+}
+</style>

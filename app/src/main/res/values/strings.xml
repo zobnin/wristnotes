@@ -1,0 +1,35 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+    <string name="app_name">Wrist Note</string>
+    <string name="editor_description">Enter Markdown. Headings, lists, and formatting will be adapted for VelaOS.</string>
+    <string name="markdown_label">Markdown</string>
+    <string name="markdown_placeholder"># Wrist Note\n\nWrite **bold**, *italic*, or ~~struck~~ text.\n\n- First item\n- Second item\n\n> A short quote\n\n`inline code`</string>
+    <string name="button_install">Send to watch</string>
+    <string name="button_building">Building…</string>
+    <string name="status_rpk_sent">RPK %1$s sent to Gadgetbridge</string>
+    <string name="error_gadgetbridge_not_found">Gadgetbridge 0.93+ was not found. Install or update Gadgetbridge.</string>
+    <string name="error_gadgetbridge_security">Gadgetbridge denied access to the RPK installer.</string>
+    <string name="error_build_failed">Could not build the RPK.</string>
+    <string name="error_enter_text">Enter text for the RPK.</string>
+    <string name="error_text_too_large">The text exceeds the 1 MB size limit.</string>
+    <string name="error_invalid_rpk_template">The built-in RPK template is invalid.</string>
+    <string name="markdown_image_default_alt">image</string>
+    <string name="markdown_image_label">Image</string>
+    <string name="format_heading_symbol" translatable="false">#</string>
+    <string name="format_bold_symbol" translatable="false">**</string>
+    <string name="format_italic_symbol" translatable="false">*</string>
+    <string name="format_strikethrough_symbol" translatable="false">~~</string>
+    <string name="format_code_symbol" translatable="false">`</string>
+    <string name="format_bullet_list_symbol" translatable="false">-</string>
+    <string name="format_numbered_list_symbol" translatable="false">1.</string>
+    <string name="format_quote_symbol" translatable="false">&gt;</string>
+    <string name="format_horizontal_rule_symbol" translatable="false">---</string>
+    <string name="format_heading">Heading</string>
+    <string name="format_bold">Bold</string>
+    <string name="format_italic">Italic</string>
+    <string name="format_strikethrough">Strikethrough</string>
+    <string name="format_code">Inline code</string>
+    <string name="format_bullet_list">Bulleted list</string>
+    <string name="format_numbered_list">Numbered list</string>
+    <string name="format_quote">Quote</string>
+    <string name="format_horizontal_rule">Horizontal rule</string>
+</resources>

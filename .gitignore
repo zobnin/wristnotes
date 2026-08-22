@@ -1,0 +1,28 @@
+*.iml
+.gradle
+/.idea/
+/.kotlin/
+/.agents/
+/.codex/
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# VelaOS build dependencies and generated packages
+/vela-template/node_modules/
+/vela-template/build/
+/vela-template/dist/
+
+# Android signing material must stay outside the repository
+*.jks
+*.keystore
