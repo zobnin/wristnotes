@@ -2,7 +2,10 @@ package org.execbit.rpker.rpk
 
 import android.content.Context
 import android.os.Build
+import androidx.core.content.edit
+import org.execbit.rpker.Note
 import org.execbit.rpker.R
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -28,15 +31,19 @@ internal class RpkBuilder(private val context: Context) {
     companion object {
         const val PACKAGE_NAME = "org.execbit.rpker"
         const val OUTPUT_FILE_NAME = "$PACKAGE_NAME.rpk"
-        private const val MARKDOWN_BLOCKS_MARKER = "\"__RPKER_MARKDOWN_BLOCKS__\""
+        private const val NOTES_MARKER = "\"__RPKER_NOTES__\""
         private const val MAX_TEXT_BYTES = 1_000_000
         private val VERSION_FORMAT = DateTimeFormatter.ofPattern("yyyy.MM.dd.HHmmss").withZone(ZoneOffset.UTC)
     }
 
-    fun build(userText: String): RpkBuildResult = synchronized(this) {
-        if (userText.isBlank()) throw RpkBuildException(context.getString(R.string.error_enter_text))
-        if (userText.toByteArray(Charsets.UTF_8).size > MAX_TEXT_BYTES) {
-            throw RpkBuildException(context.getString(R.string.error_text_too_large))
+    fun build(notes: List<Note>): RpkBuildResult = synchronized(this) {
+        if (notes.isEmpty()) throw RpkBuildException(context.getString(R.string.error_no_notes))
+        if (notes.any { it.markdown.isBlank() }) {
+            throw RpkBuildException(context.getString(R.string.error_empty_note))
+        }
+        val totalTextBytes = notes.sumOf { it.markdown.toByteArray(Charsets.UTF_8).size.toLong() }
+        if (totalTextBytes > MAX_TEXT_BYTES) {
+            throw RpkBuildException(context.getString(R.string.error_notes_too_large))
         }
 
         val now = Instant.now()
@@ -47,20 +54,25 @@ internal class RpkBuilder(private val context: Context) {
         val versionName = VERSION_FORMAT.format(Instant.ofEpochSecond(versionCode.toLong()))
 
         val comment = JSONObject()
-            .put("toolkit", "Wrist Note Android / aiotpack-compatible")
+            .put("toolkit", "Wrist Notes Android / aiotpack-compatible")
             .put("timeStamp", now.toString())
             .put("node", "Android")
             .put("platform", "android")
             .put("arch", Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown")
             .put("component", true)
             .toString()
-        val markdown = MarkdownRenderer.render(
-            markdown = userText,
-            strings = MarkdownStrings(
-                defaultImageAlt = context.getString(R.string.markdown_image_default_alt),
-                imageLabel = context.getString(R.string.markdown_image_label),
-            ),
+        val markdownStrings = MarkdownStrings(
+            defaultImageAlt = context.getString(R.string.markdown_image_default_alt),
+            imageLabel = context.getString(R.string.markdown_image_label),
         )
+        val renderedNotes = JSONArray().apply {
+            notes.forEach { note ->
+                val document = MarkdownRenderer.render(note.markdown, markdownStrings)
+                put(JSONObject().put("blocks", JSONArray(document.blocksJson())))
+            }
+        }.toString()
+            .replace("\u2028", "\\u2028")
+            .replace("\u2029", "\\u2029")
 
         val payload = linkedMapOf<String, ByteArray>()
         payload["manifest-watch.json"] = renderManifest(
@@ -71,7 +83,7 @@ internal class RpkBuilder(private val context: Context) {
         )
         payload["app.js"] = readAssetBytes("rpk_template/app.js")
         payload["pages/index/index.js"] = renderPage(
-            readAssetText("rpk_template/pages/index/index.js"), markdown.blocksJson()
+            readAssetText("rpk_template/pages/index/index.js"), renderedNotes
         ).toByteArray(Charsets.UTF_8)
         payload["common/logo.png"] = readAssetBytes("rpk_template/common/logo.png")
         payload["META-INF/build.txt"] = buildInfo(comment).toByteArray(Charsets.UTF_8)
@@ -125,7 +137,7 @@ internal class RpkBuilder(private val context: Context) {
         } finally {
             temporary.delete()
         }
-        preferences.edit().putInt("last_version_code", versionCode).apply()
+        preferences.edit { putInt("last_version_code", versionCode) }
         RpkBuildResult(output, versionCode, versionName)
     }
 
@@ -138,11 +150,11 @@ internal class RpkBuilder(private val context: Context) {
             .toString(2)
             .toByteArray(Charsets.UTF_8)
 
-    internal fun renderPage(template: String, blocksJson: String): String {
-        if (template.windowed(MARKDOWN_BLOCKS_MARKER.length).count { it == MARKDOWN_BLOCKS_MARKER } != 1) {
+    internal fun renderPage(template: String, notesJson: String): String {
+        if (template.windowed(NOTES_MARKER.length).count { it == NOTES_MARKER } != 1) {
             throw RpkBuildException(context.getString(R.string.error_invalid_rpk_template))
         }
-        return template.replace(MARKDOWN_BLOCKS_MARKER, blocksJson)
+        return template.replace(NOTES_MARKER, notesJson)
     }
 
     private fun createZip(entries: List<RpkEntry>, comment: String): ByteArray {

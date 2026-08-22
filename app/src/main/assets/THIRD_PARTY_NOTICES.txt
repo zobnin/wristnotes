@@ -22,7 +22,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 commonmark-java 0.28.0
 ======================
 
-Wrist Note uses commonmark-java core and the GFM strikethrough extension,
+Wrist Notes uses commonmark-java core and the GFM strikethrough extension,
 distributed under the BSD 2-Clause License.
 
 Copyright (c) 2015, Atlassian Pty Ltd

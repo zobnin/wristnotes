@@ -2,6 +2,10 @@ package org.execbit.rpker
 
 import android.content.Intent
 import android.graphics.BitmapFactory
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.execbit.rpker.rpk.MarkdownRenderer
@@ -21,15 +25,21 @@ class RpkBuilderInstrumentedTest {
 
     @Test
     fun buildsSignedRpkWithExactUnicodeTextAndIncreasingVersion() {
-        val markdown = "# Привет, VelaOS!\n\nКавычки: **\"тест\"**; slash: `\\`; emoji: 🚀"
-        val first = RpkBuilder(context).build(markdown)
+        val firstNote = "# Привет, VelaOS!\n\nКавычки: **\"тест\"**; slash: `\\`; emoji: 🚀"
+        val secondNote = "## Вторая заметка\n\nПерелистните экран"
+        val first = RpkBuilder(context).build(
+            listOf(
+                Note(id = "first", markdown = firstNote),
+                Note(id = "second", markdown = secondNote),
+            )
+        )
         val firstBytes = first.file.readBytes()
         assertTrue(firstBytes.containsAscii("RPK Sig Block 42"))
 
         ZipFile(first.file).use { zip ->
             val manifest = JSONObject(zip.getInputStream(zip.getEntry("manifest.json")).reader().readText())
             assertEquals("org.execbit.rpker", manifest.getString("package"))
-            assertEquals("Wrist Note", manifest.getString("name"))
+            assertEquals("Wrist Notes", manifest.getString("name"))
             assertEquals(first.versionCode, manifest.getInt("versionCode"))
             assertEquals("/common/logo.png", manifest.getString("icon"))
 
@@ -43,18 +53,27 @@ class RpkBuilderInstrumentedTest {
 
             val page = zip.getInputStream(zip.getEntry("pages/index/index.js")).reader().readText()
             assertTrue(page.contains("VelaOS!"))
+            assertTrue(page.contains("Вторая заметка"))
             assertTrue(page.contains("\"style\":\"strong\""))
             assertTrue(page.contains("\"style\":\"code\""))
-            assertFalse(page.contains("__RPKER_MARKDOWN_BLOCKS__"))
+            assertFalse(page.contains("__RPKER_NOTES__"))
+            assertTrue(page.contains("\"notes-swiper\""))
+            assertTrue(page.contains("onNoteChanged"))
+            assertTrue(page.contains("currentNumber"))
+            assertTrue(page.contains("exitApp"))
+            assertTrue(page.contains("this.\$app.exit()"))
+            assertTrue(page.contains("width: \"220px\""))
+            assertTrue(page.contains("height: \"128px\""))
+            assertTrue(page.contains("paddingTop: \"48px\""))
+            assertTrue(page.contains("paddingBottom: \"48px\""))
             assertTrue(page.contains("condition: \"screen and (shape:circle)\""))
             assertTrue(page.contains("condition: \"screen and (shape:pill-shaped)\""))
-            assertTrue(page.contains("paddingTop: \"144px\""))
-            assertTrue(page.contains("paddingBottom: \"144px\""))
+            assertTrue(page.contains("height: \"144px\""))
             assertTrue(page.contains("fontSize: \"60px\""))
             assertTrue(zip.getEntry("META-INF/CERT") != null)
         }
 
-        val second = RpkBuilder(context).build("Вторая версия")
+        val second = RpkBuilder(context).build(listOf(Note(id = "only", markdown = "Новая версия")))
         assertTrue(second.versionCode > first.versionCode)
     }
 
@@ -120,8 +139,26 @@ class RpkBuilderInstrumentedTest {
     }
 
     @Test
+    fun markdownPreviewRemovesMarkersAndKeepsInlineFormatting() {
+        val preview = MarkdownRenderer.render(
+            markdown = "# Heading\n\n**bold** *italic* ~~gone~~ `code` [link](https://example.com)",
+            strings = MarkdownStrings(defaultImageAlt = "image", imageLabel = "Image"),
+        ).toAnnotatedString()
+
+        assertEquals(
+            "Heading\nbold italic gone code link (https://example.com)",
+            preview.text,
+        )
+        assertTrue(preview.spanStyles.any { it.item.fontWeight == FontWeight.Bold })
+        assertTrue(preview.spanStyles.any { it.item.fontStyle == FontStyle.Italic })
+        assertTrue(preview.spanStyles.any { it.item.textDecoration == TextDecoration.LineThrough })
+        assertTrue(preview.spanStyles.any { it.item.fontFamily == FontFamily.Monospace })
+        assertTrue(preview.spanStyles.any { it.item.textDecoration == TextDecoration.Underline })
+    }
+
+    @Test
     fun gadgetbridgeIntentUsesNarrowFileProviderGrant() {
-        val result = RpkBuilder(context).build("Intent test")
+        val result = RpkBuilder(context).build(listOf(Note(id = "intent", markdown = "Intent test")))
         val intent = GadgetbridgeInstaller.createIntent(context, result.file)
 
         assertEquals(Intent.ACTION_VIEW, intent.action)
@@ -135,6 +172,22 @@ class RpkBuilderInstrumentedTest {
         assertEquals("content", intent.data?.scheme)
         context.contentResolver.openInputStream(requireNotNull(intent.data)).use { input ->
             assertTrue(requireNotNull(input).readBytes().isNotEmpty())
+        }
+    }
+
+    @Test
+    fun noteStorePreservesOrderAndMarkdown() {
+        val preferencesName = "note_store_test_${System.nanoTime()}"
+        try {
+            val notes = listOf(
+                Note(id = "one", markdown = "# First\n\nText"),
+                Note(id = "two", markdown = "Вторая 🚀"),
+            )
+            NoteStore(context, preferencesName).save(notes)
+
+            assertEquals(notes, NoteStore(context, preferencesName).load())
+        } finally {
+            context.deleteSharedPreferences(preferencesName)
         }
     }
 

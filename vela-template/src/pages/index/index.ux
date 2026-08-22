@@ -1,19 +1,36 @@
 <template>
   <div class="page">
-    <scroll class="text-scroll" scroll-y="true" bounces="true">
-      <div class="document">
-        <text class="content {{ $item.type }}" for="{{ blocks }}">
-          <span class="{{ $item.style }}" for="{{ $item.segments }}">{{ $item.text }}</span>
-        </text>
+    <div class="top-safe">
+      <text class="back-button" onclick="exitApp">←</text>
+    </div>
+    <swiper class="notes-swiper" index="0" indicator="false" loop="false" @change="onNoteChanged">
+      <div class="note-page" for="note in notes">
+        <scroll class="text-scroll" scroll-y="true" bounces="true">
+          <div class="document">
+            <text class="content {{ block.type }}" for="block in note.blocks">
+              <span class="{{ segment.style }}" for="segment in block.segments">{{ segment.text }}</span>
+            </text>
+          </div>
+        </scroll>
       </div>
-    </scroll>
+    </swiper>
+    <div class="counter-bar">
+      <text class="counter">{{ currentNumber }} / {{ notes.length }}</text>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
   private: {
-    blocks: "__RPKER_MARKDOWN_BLOCKS__"
+    notes: "__RPKER_NOTES__",
+    currentNumber: 1
+  },
+  onNoteChanged(event) {
+    this.currentNumber = event.index + 1
+  },
+  exitApp() {
+    this.$app.exit()
   }
 }
 </script>
@@ -26,16 +43,64 @@ export default {
   flex-direction: column;
 }
 
+.top-safe {
+  width: 100%;
+  height: 72px;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.back-button {
+  width: 120px;
+  height: 64px;
+  border-radius: 32px;
+  background-color: #2c2b35;
+  color: #ffffff;
+  font-size: 48px;
+  line-height: 64px;
+  text-align: center;
+}
+
+.notes-swiper {
+  width: 100%;
+  flex: 1;
+}
+
+.note-page {
+  width: 100%;
+  height: 100%;
+}
+
 .text-scroll {
   width: 100%;
   height: 100%;
-  padding: 36px;
+  padding-left: 36px;
+  padding-right: 36px;
+  padding-top: 24px;
+  padding-bottom: 24px;
   flex-direction: column;
 }
 
 .document {
   width: 100%;
   flex-direction: column;
+}
+
+.counter-bar {
+  width: 100%;
+  height: 72px;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.counter {
+  width: 100%;
+  color: #7e8796;
+  font-size: 38px;
+  line-height: 48px;
+  text-align: center;
 }
 
 .content {
@@ -114,20 +179,54 @@ export default {
 }
 
 @media screen and (shape: circle) {
+  .top-safe {
+    height: 72px;
+  }
+
   .text-scroll {
     padding-left: 72px;
     padding-right: 72px;
-    padding-top: 72px;
-    padding-bottom: 72px;
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+
+  .counter-bar {
+    height: 72px;
+  }
+
+  .counter {
+    font-size: 42px;
+    line-height: 52px;
   }
 }
 
 @media screen and (shape: pill-shaped) {
+  .top-safe {
+    height: 144px;
+  }
+
   .text-scroll {
     padding-left: 24px;
     padding-right: 24px;
-    padding-top: 144px;
-    padding-bottom: 144px;
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .counter-bar {
+    height: 144px;
+  }
+
+  .counter {
+    font-size: 60px;
+    line-height: 72px;
+  }
+
+  .back-button {
+    width: 220px;
+    height: 128px;
+    border-radius: 64px;
+    font-size: 72px;
+    line-height: 128px;
   }
 
   .content {

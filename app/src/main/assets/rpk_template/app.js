@@ -11,7 +11,7 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                 var __webpack_modules__ = {
                     "./src/manifest.json" (module) {
                         "use strict";
-                        module.exports = JSON.parse('{"package":"org.execbit.rpker","name":"Wrist Note","versionName":"1.0.0","versionCode":1,"minPlatformVersion":1000,"minAPILevel":2,"icon":"/common/logo.png","deviceTypeList":["watch"],"features":[],"config":{"logLevel":"error","designWidth":480},"router":{"entry":"pages/index","pages":{"pages/index":{"component":"index"}}}}');
+                        module.exports = JSON.parse('{"package":"org.execbit.rpker","name":"Wrist Notes","versionName":"1.0.0","versionCode":1,"minPlatformVersion":1000,"minAPILevel":2,"icon":"/common/logo.png","deviceTypeList":["watch"],"features":[],"config":{"logLevel":"error","designWidth":480},"router":{"entry":"pages/index","pages":{"pages/index":{"component":"index"}}}}');
                     }
                 };
                 var __webpack_module_cache__ = {};

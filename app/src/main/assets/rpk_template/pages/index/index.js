@@ -44,16 +44,73 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                         [
                             [
                                 0,
+                                "top-safe"
+                            ]
+                        ],
+                        {
+                            width: "100%",
+                            height: "72px",
+                            flexShrink: 0,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }
+                    ],
+                    [
+                        [
+                            [
+                                0,
+                                "back-button"
+                            ]
+                        ],
+                        {
+                            width: "120px",
+                            height: "64px",
+                            borderRadius: "32px",
+                            backgroundColor: "#2c2b35",
+                            color: "#ffffff",
+                            fontSize: "48px",
+                            lineHeight: "64px",
+                            textAlign: "center"
+                        }
+                    ],
+                    [
+                        [
+                            [
+                                0,
+                                "notes-swiper"
+                            ]
+                        ],
+                        {
+                            width: "100%",
+                            flex: 1
+                        }
+                    ],
+                    [
+                        [
+                            [
+                                0,
+                                "note-page"
+                            ]
+                        ],
+                        {
+                            width: "100%",
+                            height: "100%"
+                        }
+                    ],
+                    [
+                        [
+                            [
+                                0,
                                 "text-scroll"
                             ]
                         ],
                         {
                             width: "100%",
                             height: "100%",
-                            paddingTop: "36px",
-                            paddingRight: "36px",
-                            paddingBottom: "36px",
                             paddingLeft: "36px",
+                            paddingRight: "36px",
+                            paddingTop: "24px",
+                            paddingBottom: "24px",
                             flexDirection: "column"
                         }
                     ],
@@ -67,6 +124,36 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                         {
                             width: "100%",
                             flexDirection: "column"
+                        }
+                    ],
+                    [
+                        [
+                            [
+                                0,
+                                "counter-bar"
+                            ]
+                        ],
+                        {
+                            width: "100%",
+                            height: "72px",
+                            flexShrink: 0,
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }
+                    ],
+                    [
+                        [
+                            [
+                                0,
+                                "counter"
+                            ]
+                        ],
+                        {
+                            width: "100%",
+                            color: "#7e8796",
+                            fontSize: "38px",
+                            lineHeight: "48px",
+                            textAlign: "center"
                         }
                     ],
                     [
@@ -245,14 +332,71 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                         [
                             [
                                 0,
+                                "top-safe"
+                            ]
+                        ],
+                        {
+                            height: "72px"
+                        }
+                    ],
+                    [
+                        {
+                            condition: "screen and (shape:circle)"
+                        },
+                        [
+                            [
+                                0,
                                 "text-scroll"
                             ]
                         ],
                         {
                             paddingLeft: "72px",
                             paddingRight: "72px",
-                            paddingTop: "72px",
-                            paddingBottom: "72px"
+                            paddingTop: "32px",
+                            paddingBottom: "32px"
+                        }
+                    ],
+                    [
+                        {
+                            condition: "screen and (shape:circle)"
+                        },
+                        [
+                            [
+                                0,
+                                "counter-bar"
+                            ]
+                        ],
+                        {
+                            height: "72px"
+                        }
+                    ],
+                    [
+                        {
+                            condition: "screen and (shape:circle)"
+                        },
+                        [
+                            [
+                                0,
+                                "counter"
+                            ]
+                        ],
+                        {
+                            fontSize: "42px",
+                            lineHeight: "52px"
+                        }
+                    ],
+                    [
+                        {
+                            condition: "screen and (shape:pill-shaped)"
+                        },
+                        [
+                            [
+                                0,
+                                "top-safe"
+                            ]
+                        ],
+                        {
+                            height: "144px"
                         }
                     ],
                     [
@@ -268,8 +412,55 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                         {
                             paddingLeft: "24px",
                             paddingRight: "24px",
-                            paddingTop: "144px",
-                            paddingBottom: "144px"
+                            paddingTop: "48px",
+                            paddingBottom: "48px"
+                        }
+                    ],
+                    [
+                        {
+                            condition: "screen and (shape:pill-shaped)"
+                        },
+                        [
+                            [
+                                0,
+                                "counter-bar"
+                            ]
+                        ],
+                        {
+                            height: "144px"
+                        }
+                    ],
+                    [
+                        {
+                            condition: "screen and (shape:pill-shaped)"
+                        },
+                        [
+                            [
+                                0,
+                                "counter"
+                            ]
+                        ],
+                        {
+                            fontSize: "60px",
+                            lineHeight: "72px"
+                        }
+                    ],
+                    [
+                        {
+                            condition: "screen and (shape:pill-shaped)"
+                        },
+                        [
+                            [
+                                0,
+                                "back-button"
+                            ]
+                        ],
+                        {
+                            width: "220px",
+                            height: "128px",
+                            borderRadius: "64px",
+                            fontSize: "72px",
+                            lineHeight: "128px"
                         }
                     ],
                     [
@@ -356,7 +547,14 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                     exports.default = void 0;
                     var _default = exports.default = {
                         private: {
-                            blocks: "__RPKER_MARKDOWN_BLOCKS__"
+                            notes: "__RPKER_NOTES__",
+                            currentNumber: 1
+                        },
+                        onNoteChanged (event) {
+                            this.currentNumber = event.index + 1;
+                        },
+                        exitApp () {
+                            this.$app.exit();
                         }
                     };
                     const moduleOwn = exports.default || module.exports;
@@ -392,75 +590,157 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                             ]
                         }
                     }, [
-                        aiot.__ce__("scroll", {
+                        aiot.__ce__("div", {
                             __vm__: _vm_,
                             __opts__: {
                                 classList: [
-                                    "text-scroll"
-                                ],
-                                scrollY: "true",
-                                bounces: "true"
+                                    "top-safe"
+                                ]
                             }
                         }, [
-                            aiot.__ce__("div", {
+                            aiot.__ce__("text", {
                                 __vm__: _vm_,
                                 __opts__: {
                                     classList: [
-                                        "document"
-                                    ]
+                                        "back-button"
+                                    ],
+                                    events: {
+                                        click: function(evt) {
+                                            return _vm_.exitApp(evt);
+                                        }
+                                    },
+                                    value: "←"
                                 }
-                            }, [
-                                aiot.__cf__({
-                                    __vm__: _vm_,
-                                    __opts__: {
-                                        exp: function() {
-                                            return _vm_.blocks;
-                                        },
-                                        key: "$idx",
-                                        value: "$item"
+                            }, [])
+                        ]),
+                        aiot.__ce__("swiper", {
+                            __vm__: _vm_,
+                            __opts__: {
+                                classList: [
+                                    "notes-swiper"
+                                ],
+                                index: "0",
+                                indicator: "false",
+                                loop: "false",
+                                events: {
+                                    change: function(evt) {
+                                        return _vm_.onNoteChanged(evt);
                                     }
-                                }, function($idx, $item) {
-                                    return [
-                                        aiot.__ce__("text", {
+                                }
+                            }
+                        }, [
+                            aiot.__cf__({
+                                __vm__: _vm_,
+                                __opts__: {
+                                    exp: function() {
+                                        return _vm_.notes;
+                                    },
+                                    key: "$idx",
+                                    value: "note"
+                                }
+                            }, function($idx, note) {
+                                return [
+                                    aiot.__ce__("div", {
+                                        __vm__: _vm_,
+                                        __opts__: {
+                                            classList: [
+                                                "note-page"
+                                            ]
+                                        }
+                                    }, [
+                                        aiot.__ce__("scroll", {
                                             __vm__: _vm_,
                                             __opts__: {
-                                                classList: function() {
-                                                    const $classValue$ = "content " + $item.type;
-                                                    if ('string' == typeof $classValue$) return $classValue$.split(' ').map((item)=>item.trim()).filter(Boolean);
-                                                    return $classValue$;
-                                                }
+                                                classList: [
+                                                    "text-scroll"
+                                                ],
+                                                scrollY: "true",
+                                                bounces: "true"
                                             }
                                         }, [
-                                            aiot.__cf__({
+                                            aiot.__ce__("div", {
                                                 __vm__: _vm_,
                                                 __opts__: {
-                                                    exp: function() {
-                                                        return $item.segments;
-                                                    },
-                                                    key: "$idx",
-                                                    value: "$item"
+                                                    classList: [
+                                                        "document"
+                                                    ]
                                                 }
-                                            }, function($idx, $item) {
-                                                return [
-                                                    aiot.__ce__("span", {
-                                                        __vm__: _vm_,
-                                                        __opts__: {
-                                                            classList: function() {
-                                                                const $classValue$ = $item.style;
-                                                                if ('string' == typeof $classValue$) return $classValue$.split(' ').map((item)=>item.trim()).filter(Boolean);
-                                                                return $classValue$;
-                                                            },
-                                                            value: function() {
-                                                                return $item.text;
+                                            }, [
+                                                aiot.__cf__({
+                                                    __vm__: _vm_,
+                                                    __opts__: {
+                                                        exp: function() {
+                                                            return note.blocks;
+                                                        },
+                                                        key: "$idx",
+                                                        value: "block"
+                                                    }
+                                                }, function($idx, block) {
+                                                    return [
+                                                        aiot.__ce__("text", {
+                                                            __vm__: _vm_,
+                                                            __opts__: {
+                                                                classList: function() {
+                                                                    const $classValue$ = "content " + block.type;
+                                                                    if ('string' == typeof $classValue$) return $classValue$.split(' ').map((item)=>item.trim()).filter(Boolean);
+                                                                    return $classValue$;
+                                                                }
                                                             }
-                                                        }
-                                                    }, [])
-                                                ];
-                                            })
+                                                        }, [
+                                                            aiot.__cf__({
+                                                                __vm__: _vm_,
+                                                                __opts__: {
+                                                                    exp: function() {
+                                                                        return block.segments;
+                                                                    },
+                                                                    key: "$idx",
+                                                                    value: "segment"
+                                                                }
+                                                            }, function($idx, segment) {
+                                                                return [
+                                                                    aiot.__ce__("span", {
+                                                                        __vm__: _vm_,
+                                                                        __opts__: {
+                                                                            classList: function() {
+                                                                                const $classValue$ = segment.style;
+                                                                                if ('string' == typeof $classValue$) return $classValue$.split(' ').map((item)=>item.trim()).filter(Boolean);
+                                                                                return $classValue$;
+                                                                            },
+                                                                            value: function() {
+                                                                                return segment.text;
+                                                                            }
+                                                                        }
+                                                                    }, [])
+                                                                ];
+                                                            })
+                                                        ])
+                                                    ];
+                                                })
+                                            ])
                                         ])
-                                    ];
-                                })
-                            ])
+                                    ])
+                                ];
+                            })
+                        ]),
+                        aiot.__ce__("div", {
+                            __vm__: _vm_,
+                            __opts__: {
+                                classList: [
+                                    "counter-bar"
+                                ]
+                            }
+                        }, [
+                            aiot.__ce__("text", {
+                                __vm__: _vm_,
+                                __opts__: {
+                                    classList: [
+                                        "counter"
+                                    ],
+                                    value: function() {
+                                        return _vm_.currentNumber + " / " + _vm_.notes.length;
+                                    }
+                                }
+                            }, [])
                         ])
                     ]);
                 };

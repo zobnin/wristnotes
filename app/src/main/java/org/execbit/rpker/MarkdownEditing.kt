@@ -1,5 +1,6 @@
 package org.execbit.rpker
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 
@@ -25,6 +26,14 @@ internal fun TextFieldValue.applyMarkdownFormat(format: MarkdownFormat): TextFie
     MarkdownFormat.NUMBERED_LIST -> prefixSelectedLines("1. ")
     MarkdownFormat.QUOTE -> prefixSelectedLines("> ")
     MarkdownFormat.HORIZONTAL_RULE -> insertBlock("---")
+}
+
+internal fun TextFieldState.applyMarkdownFormat(format: MarkdownFormat) {
+    val updated = TextFieldValue(text.toString(), selection).applyMarkdownFormat(format)
+    edit {
+        replace(0, length, updated.text)
+        selection = updated.selection
+    }
 }
 
 private fun TextFieldValue.wrapSelection(opening: String, closing: String): TextFieldValue {
