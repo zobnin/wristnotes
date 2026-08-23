@@ -482,7 +482,12 @@ private fun NoteEditor(
                     .onFocusChanged { editorFocused = it.isFocused },
                 labelPosition = TextFieldLabelPosition.Attached(alwaysMinimize = true),
                 label = { Text(stringResource(R.string.markdown_label)) },
-                placeholder = { Text(stringResource(R.string.markdown_placeholder)) },
+                placeholder = {
+                    Text(
+                        text = stringResource(R.string.markdown_placeholder),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                    )
+                },
             )
             Button(
                 onClick = onSave,
