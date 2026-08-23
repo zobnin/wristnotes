@@ -1,6 +1,8 @@
 package org.execbit.rpker
 
+import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.byValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 
@@ -36,6 +38,29 @@ internal fun TextFieldState.applyMarkdownFormat(format: MarkdownFormat) {
     }
 }
 
+internal val markdownListContinuationTransformation =
+    InputTransformation.byValue { current, proposed ->
+        continueMarkdownListOnNewline(current, proposed)
+    }
+
+internal fun continueMarkdownListOnNewline(
+    current: CharSequence,
+    proposed: CharSequence,
+): CharSequence {
+    if (proposed.length != current.length + 1) return proposed
+
+    val insertedAt = current.indices.firstOrNull { current[it] != proposed[it] } ?: current.length
+    if (proposed[insertedAt] != '\n') return proposed
+    if (!proposed.removeRange(insertedAt, insertedAt + 1).contentEquals(current)) return proposed
+
+    val previousLine = proposed
+        .subSequence(0, insertedAt)
+        .toString()
+        .substringAfterLast('\n')
+    val marker = markdownListPrefixes.firstOrNull(previousLine::startsWith) ?: return proposed
+    return proposed.replaceRange(insertedAt + 1, insertedAt + 1, marker)
+}
+
 internal fun shouldCapitalizeMarkdownContent(
     text: CharSequence,
     selection: TextRange,
@@ -52,7 +77,8 @@ internal fun shouldCapitalizeMarkdownContent(
         .none(Char::isWhitespace)
 }
 
-private val markdownLinePrefixes = setOf("# ", "- ", "1. ", "> ")
+private val markdownListPrefixes = listOf("- ", "1. ")
+private val markdownLinePrefixes = markdownListPrefixes + listOf("# ", "> ")
 
 private fun TextFieldValue.wrapSelection(opening: String, closing: String): TextFieldValue {
     val start = selection.min

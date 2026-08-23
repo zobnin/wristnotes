@@ -66,4 +66,32 @@ class MarkdownEditingTest {
         )
     }
 
+    @Test
+    fun continuesBulletListAfterNewline() {
+        val result = continueMarkdownListOnNewline("- First", "- First\n")
+
+        assertEquals("- First\n- ", result.toString())
+    }
+
+    @Test
+    fun continuesNumberedListAfterNewline() {
+        val result = continueMarkdownListOnNewline("1. First", "1. First\n")
+
+        assertEquals("1. First\n1. ", result.toString())
+    }
+
+    @Test
+    fun continuesListWhenNewlineIsInsertedInTheMiddle() {
+        val result = continueMarkdownListOnNewline("- First second", "- First\n second")
+
+        assertEquals("- First\n-  second", result.toString())
+    }
+
+    @Test
+    fun leavesRegularParagraphUnchangedAfterNewline() {
+        val proposed = "First\n"
+
+        assertEquals(proposed, continueMarkdownListOnNewline("First", proposed))
+    }
+
 }

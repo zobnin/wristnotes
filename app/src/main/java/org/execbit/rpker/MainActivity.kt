@@ -467,6 +467,7 @@ private fun NoteEditor(
             }
             OutlinedTextField(
                 state = input,
+                inputTransformation = markdownListContinuationTransformation,
                 keyboardOptions = KeyboardOptions(
                     capitalization = if (shouldCapitalizeMarkdownContent(input.text, input.selection)) {
                         KeyboardCapitalization.Words
