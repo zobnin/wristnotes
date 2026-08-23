@@ -3,6 +3,7 @@ package org.execbit.rpker
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.byValue
+import androidx.compose.foundation.text.input.then
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 
@@ -38,10 +39,19 @@ internal fun TextFieldState.applyMarkdownFormat(format: MarkdownFormat) {
     }
 }
 
-internal val markdownListContinuationTransformation =
+private val markdownAtomicBackspaceTransformation = InputTransformation {
+    val previous = TextFieldValue(originalText.toString(), originalSelection)
+    val proposed = TextFieldValue(asCharSequence().toString(), selection)
+    val marker = atomicMarkdownMarkerForBackspace(previous, proposed) ?: return@InputTransformation
+
+    replace(marker.start, marker.end - 1, "")
+    placeCursorBeforeCharAt(marker.start)
+}
+
+internal val markdownInputTransformation =
     InputTransformation.byValue { current, proposed ->
         continueMarkdownListOnNewline(current, proposed)
-    }
+    }.then(markdownAtomicBackspaceTransformation)
 
 internal fun continueMarkdownListOnNewline(
     current: CharSequence,
@@ -59,6 +69,67 @@ internal fun continueMarkdownListOnNewline(
         .substringAfterLast('\n')
     val marker = markdownListPrefixes.firstOrNull(previousLine::startsWith) ?: return proposed
     return proposed.replaceRange(insertedAt + 1, insertedAt + 1, marker)
+}
+
+internal fun TextFieldValue.applyAtomicMarkdownBackspace(previous: TextFieldValue): TextFieldValue {
+    val marker = atomicMarkdownMarkerForBackspace(previous, this) ?: return this
+    return copy(
+        text = text.removeRange(marker.start, marker.end - 1),
+        selection = TextRange(marker.start),
+        composition = null,
+    )
+}
+
+private fun atomicMarkdownMarkerForBackspace(
+    previous: TextFieldValue,
+    proposed: TextFieldValue,
+): TextRange? {
+    if (!previous.selection.collapsed || !proposed.selection.collapsed) return null
+    if (previous.text.length != proposed.text.length + 1) return null
+
+    val deletedAt = proposed.selection.start
+    if (previous.selection.start != deletedAt + 1) return null
+    if (!previous.text.removeRange(deletedAt, deletedAt + 1).contentEquals(proposed.text)) return null
+
+    return atomicMarkdownMarkerAt(previous.text, deletedAt)
+}
+
+private fun atomicMarkdownMarkerAt(text: String, index: Int): TextRange? {
+    val lineStart = text.lastIndexOf('\n', index - 1) + 1
+    markdownBlockMarkerEnd(text, lineStart)?.let { markerEnd ->
+        if (index in lineStart until markerEnd) return TextRange(lineStart, markerEnd)
+    }
+
+    val marker = text.getOrNull(index)?.takeIf { it == '*' || it == '~' } ?: return null
+    var runStart = index
+    while (runStart > 0 && text[runStart - 1] == marker) runStart--
+    var runEnd = index + 1
+    while (runEnd < text.length && text[runEnd] == marker) runEnd++
+    if (runEnd - runStart < 2) return null
+
+    val pairStart = runStart + ((index - runStart) / 2) * 2
+    return if (pairStart + 2 <= runEnd) {
+        TextRange(pairStart, pairStart + 2)
+    } else {
+        TextRange(runEnd - 2, runEnd)
+    }
+}
+
+private fun markdownBlockMarkerEnd(text: String, lineStart: Int): Int? {
+    if (text.startsWith("---", lineStart)) return lineStart + 3
+    if (text.startsWith("- ", lineStart) || text.startsWith("> ", lineStart)) return lineStart + 2
+
+    var markerEnd = lineStart
+    while (markerEnd < text.length && markerEnd - lineStart < 6 && text[markerEnd] == '#') {
+        markerEnd++
+    }
+    if (markerEnd > lineStart && text.getOrNull(markerEnd) == ' ') return markerEnd + 1
+
+    markerEnd = lineStart
+    while (text.getOrNull(markerEnd)?.isDigit() == true) markerEnd++
+    if (markerEnd > lineStart && text.startsWith(". ", markerEnd)) return markerEnd + 2
+
+    return null
 }
 
 internal fun shouldCapitalizeMarkdownContent(

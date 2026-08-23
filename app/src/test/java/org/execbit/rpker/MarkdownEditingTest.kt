@@ -94,4 +94,60 @@ class MarkdownEditingTest {
         assertEquals(proposed, continueMarkdownListOnNewline("First", proposed))
     }
 
+    @Test
+    fun deletesBlockMarkersAtomicallyWithBackspace() {
+        val markers = listOf("# ", "- ", "1. ", "> ", "---", "### ", "12. ")
+
+        markers.forEach { marker ->
+            val result = backspace(marker, marker.length)
+
+            assertEquals("Expected $marker to be deleted atomically", "", result.text)
+            assertEquals(TextRange.Zero, result.selection)
+        }
+    }
+
+    @Test
+    fun deletesDoubleInlineMarkersAtomically() {
+        listOf("**", "~~").forEach { marker ->
+            val text = "before ${marker}after"
+            val result = backspace(text, "before $marker".length)
+
+            assertEquals("before after", result.text)
+            assertEquals(TextRange("before ".length), result.selection)
+        }
+    }
+
+    @Test
+    fun deletesClosingDoubleMarkerAtomically() {
+        val result = backspace("~~text~~", "~~text~~".length)
+
+        assertEquals("~~text", result.text)
+        assertEquals(TextRange("~~text".length), result.selection)
+    }
+
+    @Test
+    fun leavesRegularBackspaceUnchanged() {
+        val result = backspace("text", "text".length)
+
+        assertEquals("tex", result.text)
+        assertEquals(TextRange(3), result.selection)
+    }
+
+    @Test
+    fun doesNotApplyAtomicBackspaceToForwardDelete() {
+        val previous = TextFieldValue("**text", TextRange.Zero)
+        val proposed = TextFieldValue("*text", TextRange.Zero)
+
+        assertEquals(proposed, proposed.applyAtomicMarkdownBackspace(previous))
+    }
+
+    private fun backspace(text: String, cursor: Int): TextFieldValue {
+        val previous = TextFieldValue(text, TextRange(cursor))
+        val proposed = TextFieldValue(
+            text = text.removeRange(cursor - 1, cursor),
+            selection = TextRange(cursor - 1),
+        )
+        return proposed.applyAtomicMarkdownBackspace(previous)
+    }
+
 }
