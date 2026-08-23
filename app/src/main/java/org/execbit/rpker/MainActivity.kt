@@ -32,6 +32,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -66,6 +67,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -465,6 +467,13 @@ private fun NoteEditor(
             }
             OutlinedTextField(
                 state = input,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = if (shouldCapitalizeMarkdownContent(input.text, input.selection)) {
+                        KeyboardCapitalization.Words
+                    } else {
+                        KeyboardCapitalization.Sentences
+                    },
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)

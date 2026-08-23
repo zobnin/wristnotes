@@ -30,4 +30,40 @@ class MarkdownEditingTest {
         assertEquals("- one\n- two", result.text)
     }
 
+    @Test
+    fun requestsCapitalizationAfterMarkdownLinePrefixes() {
+        val formats = listOf(
+            MarkdownFormat.HEADING,
+            MarkdownFormat.BULLET_LIST,
+            MarkdownFormat.NUMBERED_LIST,
+            MarkdownFormat.QUOTE,
+        )
+
+        formats.forEach { format ->
+            val result = TextFieldValue("", TextRange.Zero).applyMarkdownFormat(format)
+
+            assertEquals(
+                "Expected capitalization after $format",
+                true,
+                shouldCapitalizeMarkdownContent(result.text, result.selection),
+            )
+        }
+    }
+
+    @Test
+    fun keepsMarkdownCapitalizationModeDuringFirstWord() {
+        assertEquals(
+            true,
+            shouldCapitalizeMarkdownContent("# H", TextRange(3)),
+        )
+    }
+
+    @Test
+    fun stopsRequestingMarkdownCapitalizationAfterFirstWord() {
+        assertEquals(
+            false,
+            shouldCapitalizeMarkdownContent("# Heading ", TextRange(10)),
+        )
+    }
+
 }

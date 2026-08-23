@@ -36,6 +36,24 @@ internal fun TextFieldState.applyMarkdownFormat(format: MarkdownFormat) {
     }
 }
 
+internal fun shouldCapitalizeMarkdownContent(
+    text: CharSequence,
+    selection: TextRange,
+): Boolean {
+    if (!selection.collapsed) return false
+
+    val lineBeforeCursor = text
+        .subSequence(0, selection.start)
+        .toString()
+        .substringAfterLast('\n')
+    val prefix = markdownLinePrefixes.firstOrNull(lineBeforeCursor::startsWith) ?: return false
+    return lineBeforeCursor
+        .removePrefix(prefix)
+        .none(Char::isWhitespace)
+}
+
+private val markdownLinePrefixes = setOf("# ", "- ", "1. ", "> ")
+
 private fun TextFieldValue.wrapSelection(opening: String, closing: String): TextFieldValue {
     val start = selection.min
     val end = selection.max
