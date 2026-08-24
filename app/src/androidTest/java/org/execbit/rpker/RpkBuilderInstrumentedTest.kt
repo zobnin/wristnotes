@@ -1,6 +1,8 @@
 package org.execbit.rpker
 
+import android.app.Application
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -215,6 +217,43 @@ class RpkBuilderInstrumentedTest {
         } finally {
             context.deleteSharedPreferences(preferencesName)
         }
+    }
+
+    @Test
+    fun receivesSharedPlainTextInANewNoteEditor() {
+        val sharedMarkdown = "# Shared note\n\nText from another app"
+        val shareIntent = Intent(Intent.ACTION_SEND)
+            .setType("text/plain")
+            .putExtra(Intent.EXTRA_TEXT, sharedMarkdown)
+
+        assertEquals(sharedMarkdown, shareIntent.sharedNoteText())
+        val shareTargets = context.packageManager.queryIntentActivities(
+            Intent(shareIntent).setPackage(context.packageName),
+            PackageManager.MATCH_DEFAULT_ONLY,
+        )
+        assertTrue(shareTargets.any { it.activityInfo.name == MainActivity::class.java.name })
+
+        val viewModel = WristNoteViewModel(context.applicationContext as Application)
+        viewModel.addNote(requireNotNull(shareIntent.sharedNoteText()))
+
+        val editor = requireNotNull(viewModel.editor)
+        assertEquals(null, editor.noteId)
+        assertEquals(sharedMarkdown, editor.input.text.toString())
+        assertEquals(sharedMarkdown.length, editor.input.selection.start)
+        assertEquals(sharedMarkdown.length, editor.input.selection.end)
+    }
+
+    @Test
+    fun ignoresTextFromUnrelatedIntents() {
+        val launchIntent = Intent(Intent.ACTION_MAIN)
+            .setType("text/plain")
+            .putExtra(Intent.EXTRA_TEXT, "Not shared")
+        val nonTextShare = Intent(Intent.ACTION_SEND)
+            .setType("image/png")
+            .putExtra(Intent.EXTRA_TEXT, "Image description")
+
+        assertEquals(null, launchIntent.sharedNoteText())
+        assertEquals(null, nonTextShare.sharedNoteText())
     }
 
     @Test

@@ -23,8 +23,14 @@ internal class WristNoteViewModel(application: Application) : AndroidViewModel(a
     var editor by mutableStateOf<NoteEditorState?>(null)
         private set
 
-    fun addNote() {
-        editor = NoteEditorState(noteId = null, input = TextFieldState())
+    fun addNote(initialMarkdown: String = "") {
+        editor = NoteEditorState(
+            noteId = null,
+            input = TextFieldState(
+                initialText = initialMarkdown,
+                initialSelection = TextRange(initialMarkdown.length),
+            ),
+        )
     }
 
     fun editNote(noteId: String) {

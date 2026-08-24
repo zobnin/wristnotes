@@ -157,6 +157,7 @@ The `-r` flag updates the existing installation and preserves the saved notes.
 1. Install and configure Gadgetbridge, then pair the wearable.
 2. Open Wrist Notes.
 3. Tap **Add note**, enter or paste Markdown, then tap **Save**.
+   You can also share text from another Android application to **Wrist Notes**; the app opens a new note with that text ready to edit or save.
 4. Add or edit any other notes you want to include.
 5. Tap the sync icon (**Send to watch**) on the main screen.
 6. Review and confirm the installation in Gadgetbridge.
@@ -205,6 +206,8 @@ Run the RPK builder, signature, Unicode, icon, Markdown, and Gadgetbridge intent
 ```sh
 ./gradlew :app:connectedDebugAndroidTest
 ```
+
+The tested Wrist Notes build remains installed on the device after the instrumented tests finish.
 
 ## Project structure
 
