@@ -51,6 +51,28 @@ class MarkdownEditingTest {
     }
 
     @Test
+    fun repeatedHeadingActionIncreasesHeadingLevel() {
+        var value = TextFieldValue("", TextRange.Zero)
+
+        val expectedHeadings = (1..6).map { level -> "#".repeat(level) + " " }
+        expectedHeadings.forEach { expected ->
+            value = value.applyMarkdownFormat(MarkdownFormat.HEADING)
+
+            assertEquals(expected, value.text)
+            assertEquals(TextRange(expected.length), value.selection)
+            assertEquals(true, shouldCapitalizeMarkdownContent(value.text, value.selection))
+        }
+    }
+
+    @Test
+    fun headingLevelStopsAtSix() {
+        val heading = "###### "
+        val value = TextFieldValue(heading, TextRange(heading.length))
+
+        assertEquals(value, value.applyMarkdownFormat(MarkdownFormat.HEADING))
+    }
+
+    @Test
     fun keepsMarkdownCapitalizationModeDuringFirstWord() {
         assertEquals(
             true,

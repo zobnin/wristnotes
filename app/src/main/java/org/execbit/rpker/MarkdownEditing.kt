@@ -20,7 +20,7 @@ internal enum class MarkdownFormat {
 }
 
 internal fun TextFieldValue.applyMarkdownFormat(format: MarkdownFormat): TextFieldValue = when (format) {
-    MarkdownFormat.HEADING -> prefixSelectedLines("# ")
+    MarkdownFormat.HEADING -> increaseHeadingLevel()
     MarkdownFormat.BOLD -> wrapSelection("**", "**")
     MarkdownFormat.ITALIC -> wrapSelection("*", "*")
     MarkdownFormat.STRIKETHROUGH -> wrapSelection("~~", "~~")
@@ -149,7 +149,47 @@ internal fun shouldCapitalizeMarkdownContent(
 }
 
 private val markdownListPrefixes = listOf("- ", "1. ")
-private val markdownLinePrefixes = markdownListPrefixes + listOf("# ", "> ")
+private val markdownHeadingPrefixes = (1..6).map { level -> "#".repeat(level) + " " }
+private val markdownLinePrefixes = markdownListPrefixes + markdownHeadingPrefixes + "> "
+
+private fun TextFieldValue.increaseHeadingLevel(): TextFieldValue {
+    val start = selection.min
+    val end = selection.max
+    val firstLineStart = text.lastIndexOf('\n', (start - 1).coerceAtLeast(0)).let { index ->
+        if (index < 0 || start == 0) 0 else index + 1
+    }
+    val lineStarts = buildList {
+        add(firstLineStart)
+        for (index in firstLineStart until end) {
+            if (text[index] == '\n' && index + 1 < end) add(index + 1)
+        }
+    }
+    val insertions = lineStarts.mapNotNull { lineStart ->
+        val headingPrefix = markdownHeadingPrefixes.firstOrNull { prefix ->
+            text.startsWith(prefix, lineStart)
+        }
+        when {
+            headingPrefix == null -> lineStart to "# "
+            headingPrefix.length <= 6 -> lineStart + headingPrefix.length - 1 to "#"
+            else -> null
+        }
+    }
+    if (insertions.isEmpty()) return this
+
+    var updatedText = text
+    insertions.asReversed().forEach { (index, insertion) ->
+        updatedText = updatedText.substring(0, index) + insertion + updatedText.substring(index)
+    }
+    val updatedSelection = if (selection.collapsed) {
+        TextRange(start + insertions.filter { it.first <= start }.sumOf { it.second.length })
+    } else {
+        TextRange(
+            start + insertions.filter { it.first <= start }.sumOf { it.second.length },
+            end + insertions.filter { it.first < end }.sumOf { it.second.length },
+        )
+    }
+    return copy(text = updatedText, selection = updatedSelection, composition = null)
+}
 
 private fun TextFieldValue.wrapSelection(opening: String, closing: String): TextFieldValue {
     val start = selection.min
