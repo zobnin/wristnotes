@@ -10,6 +10,8 @@
     <string name="action_reorder_note">Перетащить заметку</string>
     <string name="action_delete">Удалить</string>
     <string name="action_cancel">Отмена</string>
+    <string name="action_back">Назад</string>
+    <string name="action_open_settings">Открыть настройки</string>
     <string name="delete_note_title">Удалить заметку?</string>
     <string name="delete_note_message">Заметка будет безвозвратно удалена с телефона.</string>
     <string name="status_rpk_sent">RPK %1$s передан в Gadgetbridge</string>
@@ -20,6 +22,9 @@
     <string name="error_empty_note">Каждая заметка должна содержать текст.</string>
     <string name="error_notes_too_large">Общий размер заметок превышает 1 МБ.</string>
     <string name="error_invalid_rpk_template">Некорректный встроенный RPK-шаблон.</string>
+    <string name="settings_title">Настройки</string>
+    <string name="install_without_questions">Устанавливать без вопросов</string>
+    <string name="install_without_questions_summary">Требуется Gadgetbridge версии XXX. В настройках устройства в Gadgetbridge должно быть разрешено устанавливать приложения.</string>
     <string name="markdown_image_default_alt">изображение</string>
     <string name="markdown_image_label">Изображение</string>
     <string name="format_heading">Заголовок</string>

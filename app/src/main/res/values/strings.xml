@@ -10,6 +10,8 @@
     <string name="action_reorder_note">Drag to reorder note</string>
     <string name="action_delete">Delete</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_back">Back</string>
+    <string name="action_open_settings">Open settings</string>
     <string name="delete_note_title">Delete note?</string>
     <string name="delete_note_message">This note will be permanently deleted from this phone.</string>
     <string name="status_rpk_sent">RPK %1$s sent to Gadgetbridge</string>
@@ -20,6 +22,9 @@
     <string name="error_empty_note">Every note must contain text.</string>
     <string name="error_notes_too_large">The notes exceed the 1 MB total size limit.</string>
     <string name="error_invalid_rpk_template">The built-in RPK template is invalid.</string>
+    <string name="settings_title">Settings</string>
+    <string name="install_without_questions">Install without prompts</string>
+    <string name="install_without_questions_summary">Requires Gadgetbridge version XXX. App installation must be enabled for this device in Gadgetbridge settings.</string>
     <string name="markdown_image_default_alt">image</string>
     <string name="markdown_image_label">Image</string>
     <string name="format_heading_symbol" translatable="false">#</string>

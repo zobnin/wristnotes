@@ -12,6 +12,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,9 +42,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldLabelPosition
@@ -67,6 +70,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -83,20 +87,42 @@ import org.execbit.rpker.ui.theme.RPKerTheme
 
 class MainActivity : ComponentActivity() {
     private val viewModel: WristNoteViewModel by viewModels()
+    private val installSettings by lazy { GadgetbridgeInstallSettings(applicationContext) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            var installMethod by remember {
+                mutableStateOf(
+                    if (BuildConfig.DEBUG) {
+                        installSettings.load()
+                    } else {
+                        GadgetbridgeInstallMethod.ACTIVITY
+                    },
+                )
+            }
             RPKerTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     WristNoteApp(
                         viewModel = viewModel,
+                        showInstallMethod = BuildConfig.DEBUG,
+                        installMethod = installMethod,
+                        onInstallMethodChange = { method ->
+                            installMethod = method
+                            installSettings.save(method)
+                        },
                         buildAndInstall = { notes ->
                             val result = withContext(Dispatchers.IO) {
                                 RpkBuilder(applicationContext).build(notes)
                             }
-                            GadgetbridgeInstaller.open(this@MainActivity, result.file)
+                            when (installMethod) {
+                                GadgetbridgeInstallMethod.BROADCAST ->
+                                    GadgetbridgeBroadcastInstaller.install(applicationContext, result.file)
+
+                                GadgetbridgeInstallMethod.ACTIVITY ->
+                                    GadgetbridgeActivityInstaller.install(this@MainActivity, result.file)
+                            }
                             getString(R.string.status_rpk_sent, result.versionName)
                         },
                     )
@@ -109,10 +135,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun WristNoteApp(
     viewModel: WristNoteViewModel,
+    showInstallMethod: Boolean,
+    installMethod: GadgetbridgeInstallMethod,
+    onInstallMethodChange: (GadgetbridgeInstallMethod) -> Unit,
     buildAndInstall: suspend (List<Note>) -> String,
 ) {
     val editor = viewModel.editor
     val context = LocalContext.current
+    var showSettings by rememberSaveable { mutableStateOf(false) }
     var isBuilding by remember { mutableStateOf(false) }
     var status by rememberSaveable { mutableStateOf<String?>(null) }
     var isError by remember { mutableStateOf(false) }
@@ -121,8 +151,12 @@ private fun WristNoteApp(
     val gadgetbridgeSecurityError = stringResource(R.string.error_gadgetbridge_security)
     val buildFailed = stringResource(R.string.error_build_failed)
 
-    BackHandler(enabled = editor != null) {
-        viewModel.closeEditor()
+    BackHandler(enabled = editor != null || showSettings) {
+        if (editor != null) {
+            viewModel.closeEditor()
+        } else {
+            showSettings = false
+        }
     }
 
     if (editor != null) {
@@ -130,12 +164,20 @@ private fun WristNoteApp(
             input = editor.input,
             onSave = viewModel::saveEditor,
         )
+    } else if (showInstallMethod && showSettings) {
+        SettingsScreen(
+            installMethod = installMethod,
+            onInstallMethodChange = onInstallMethodChange,
+            onBack = { showSettings = false },
+        )
     } else {
         NotesScreen(
             notes = viewModel.notes,
             isBuilding = isBuilding,
             status = status,
             isError = isError,
+            showSettingsAction = showInstallMethod,
+            onOpenSettings = { showSettings = true },
             onAdd = {
                 status = null
                 isError = false
@@ -192,6 +234,8 @@ private fun NotesScreen(
     isBuilding: Boolean,
     status: String?,
     isError: Boolean,
+    showSettingsAction: Boolean,
+    onOpenSettings: () -> Unit,
     onAdd: () -> Unit,
     onEdit: (String) -> Unit,
     onDelete: (String) -> Unit,
@@ -209,11 +253,35 @@ private fun NotesScreen(
             .fillMaxSize()
             .systemBarsPadding(),
     ) {
-        Text(
-            text = stringResource(R.string.app_name),
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp),
-            style = MaterialTheme.typography.headlineLarge,
-        )
+        if (showSettingsAction) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 8.dp, top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.headlineLarge,
+                )
+                IconButton(
+                    onClick = onOpenSettings,
+                    enabled = !isBuilding,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_settings),
+                        contentDescription = stringResource(R.string.action_open_settings),
+                    )
+                }
+            }
+        } else {
+            Text(
+                text = stringResource(R.string.app_name),
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp),
+                style = MaterialTheme.typography.headlineLarge,
+            )
+        }
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -314,6 +382,90 @@ private fun NotesScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun SettingsScreen(
+    installMethod: GadgetbridgeInstallMethod,
+    onInstallMethodChange: (GadgetbridgeInstallMethod) -> Unit,
+    onBack: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 20.dp, top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = stringResource(R.string.action_back),
+                )
+            }
+            Text(
+                text = stringResource(R.string.settings_title),
+                modifier = Modifier.padding(start = 4.dp),
+                style = MaterialTheme.typography.headlineLarge,
+            )
+        }
+        InstallMethodSetting(
+            method = installMethod,
+            onMethodChange = onInstallMethodChange,
+        )
+    }
+}
+
+@Composable
+private fun InstallMethodSetting(
+    method: GadgetbridgeInstallMethod,
+    onMethodChange: (GadgetbridgeInstallMethod) -> Unit,
+) {
+    val installWithoutQuestions = method == GadgetbridgeInstallMethod.BROADCAST
+
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .toggleable(
+                    value = installWithoutQuestions,
+                    role = Role.Switch,
+                    onValueChange = { enabled ->
+                        onMethodChange(
+                            if (enabled) {
+                                GadgetbridgeInstallMethod.BROADCAST
+                            } else {
+                                GadgetbridgeInstallMethod.ACTIVITY
+                            },
+                        )
+                    },
+                )
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.install_without_questions),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text = stringResource(R.string.install_without_questions_summary),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Switch(
+                checked = installWithoutQuestions,
+                onCheckedChange = null,
+                modifier = Modifier.padding(start = 16.dp),
+            )
+        }
+        HorizontalDivider(modifier = Modifier.padding(start = 24.dp))
     }
 }
 

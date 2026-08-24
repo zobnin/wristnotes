@@ -6,6 +6,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.core.content.IntentCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.execbit.rpker.rpk.MarkdownRenderer
@@ -157,9 +158,34 @@ class RpkBuilderInstrumentedTest {
     }
 
     @Test
-    fun gadgetbridgeIntentUsesNarrowFileProviderGrant() {
+    fun gadgetbridgeBroadcastUsesNarrowFileProviderGrant() {
+        val result = RpkBuilder(context).build(listOf(Note(id = "broadcast", markdown = "Intent test")))
+        val uri = rpkFileUri(context, result.file)
+        val intent = GadgetbridgeBroadcastInstaller.createInstallAppIntent(uri, "AA:BB:CC:DD:EE:FF")
+
+        assertEquals(
+            "nodomain.freeyourgadget.gadgetbridge.command.INSTALL_APP",
+            intent.action,
+        )
+        assertEquals(null, intent.`package`)
+        assertEquals(null, intent.data)
+        assertEquals("AA:BB:CC:DD:EE:FF", intent.getStringExtra("device"))
+        assertTrue(intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
+        val streamUri = requireNotNull(
+            IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, android.net.Uri::class.java),
+        )
+        assertEquals(streamUri, intent.clipData?.getItemAt(0)?.uri)
+        assertEquals("content", streamUri.scheme)
+        assertTrue(requireNotNull(streamUri.lastPathSegment).endsWith(".rpk"))
+        context.contentResolver.openInputStream(streamUri).use { input ->
+            assertTrue(requireNotNull(input).readBytes().isNotEmpty())
+        }
+    }
+
+    @Test
+    fun legacyGadgetbridgeActivityIntentUsesNarrowFileProviderGrant() {
         val result = RpkBuilder(context).build(listOf(Note(id = "intent", markdown = "Intent test")))
-        val intent = GadgetbridgeInstaller.createIntent(context, result.file)
+        val intent = GadgetbridgeActivityInstaller.createIntent(context, result.file)
 
         assertEquals(Intent.ACTION_VIEW, intent.action)
         assertEquals("application/zip", intent.type)
@@ -186,6 +212,24 @@ class RpkBuilderInstrumentedTest {
             NoteStore(context, preferencesName).save(notes)
 
             assertEquals(notes, NoteStore(context, preferencesName).load())
+        } finally {
+            context.deleteSharedPreferences(preferencesName)
+        }
+    }
+
+    @Test
+    fun gadgetbridgeInstallSettingsDefaultToActivityAndPersistSelection() {
+        val preferencesName = "install_settings_test_${System.nanoTime()}"
+        try {
+            val settings = GadgetbridgeInstallSettings(context, preferencesName)
+            assertEquals(GadgetbridgeInstallMethod.ACTIVITY, settings.load())
+
+            settings.save(GadgetbridgeInstallMethod.BROADCAST)
+
+            assertEquals(
+                GadgetbridgeInstallMethod.BROADCAST,
+                GadgetbridgeInstallSettings(context, preferencesName).load(),
+            )
         } finally {
             context.deleteSharedPreferences(preferencesName)
         }
