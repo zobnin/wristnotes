@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 192 192">
+  <!-- Full-bleed background: Google Play applies the corner mask and shadow. -->
+  <rect width="192" height="192" fill="#5B55E7"/>
+  <path fill="#FFFFFF" fill-rule="evenodd" d="M56 36h56l24 24v96H56zM112 36v24h24zM75 82h42v9H75zM75 105h42v9H75zM75 128h28v9H75z"/>
+</svg>
