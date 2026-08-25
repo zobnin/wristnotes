@@ -24,6 +24,7 @@ internal data class MarkdownDocument(
                         put(JSONObject().put("style", segment.style).put("text", segment.text))
                     }
                 })
+                block.value?.let { put("value", it) }
             })
         }
     }.toString().replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
@@ -32,6 +33,7 @@ internal data class MarkdownDocument(
 internal data class VelaBlock(
     val type: String,
     val segments: List<VelaSpan>,
+    val value: String? = null,
 )
 
 internal data class VelaSpan(
@@ -148,7 +150,14 @@ private class VelaHtmlParser(
             "strong", "b" -> pushStyle { copy(bold = true) }
             "em", "i" -> pushStyle { copy(italic = true) }
             "del", "s", "strike" -> pushStyle { copy(deleted = true) }
-            "code" -> pushStyle { copy(code = true) }
+            "code" -> {
+                if (preDepth > 0) {
+                    fencedComponentType(xml.getAttributeValue(null, "class"))?.let { componentType ->
+                        blockType = componentType
+                    }
+                }
+                pushStyle { copy(code = true) }
+            }
             "a" -> {
                 links.addLast(xml.getAttributeValue(null, "href").orEmpty())
                 pushStyle { copy(link = true) }
@@ -244,7 +253,7 @@ private class VelaHtmlParser(
 
     private fun finishBlock() {
         val type = blockType ?: return
-        if (type == "code-block") {
+        if (type in fencedBlockTypes) {
             spans.lastOrNull()?.let { last ->
                 if (last.text.endsWith('\n')) last.text = last.text.dropLast(1)
             }
@@ -259,8 +268,36 @@ private class VelaHtmlParser(
         val rendered = spans
             .filter { it.text.isNotEmpty() }
             .map { VelaSpan(it.text, it.style.className()) }
-        if (rendered.isNotEmpty()) blocks += VelaBlock(type, rendered)
+        if (rendered.isNotEmpty()) {
+            blocks += VelaBlock(
+                type = type,
+                segments = rendered,
+                value = if (type in nativeCodeBlockTypes) {
+                    rendered.joinToString(separator = "") { it.text }
+                } else {
+                    null
+                },
+            )
+        }
         spans.clear()
         blockType = null
+    }
+
+    private fun fencedComponentType(className: String?): String? {
+        val language = className
+            ?.split(Regex("\\s+"))
+            ?.firstOrNull { it.startsWith("language-") }
+            ?.removePrefix("language-")
+            ?.lowercase()
+        return when (language) {
+            "qrcode" -> "qrcode"
+            "barcode" -> "barcode"
+            else -> null
+        }
+    }
+
+    private companion object {
+        val nativeCodeBlockTypes = setOf("qrcode", "barcode")
+        val fencedBlockTypes = nativeCodeBlockTypes + "code-block"
     }
 }

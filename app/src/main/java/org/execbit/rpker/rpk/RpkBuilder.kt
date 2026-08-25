@@ -32,6 +32,7 @@ internal class RpkBuilder(private val context: Context) {
         const val PACKAGE_NAME = "org.execbit.rpker"
         const val OUTPUT_FILE_NAME = "$PACKAGE_NAME.rpk"
         private const val NOTES_MARKER = "\"__RPKER_NOTES__\""
+        private const val MAX_BARCODE_BYTES = 20
         private const val MAX_TEXT_BYTES = 1_000_000
         private val VERSION_FORMAT = DateTimeFormatter.ofPattern("yyyy.MM.dd.HHmmss").withZone(ZoneOffset.UTC)
     }
@@ -68,6 +69,15 @@ internal class RpkBuilder(private val context: Context) {
         val renderedNotes = JSONArray().apply {
             notes.forEach { note ->
                 val document = MarkdownRenderer.render(note.markdown, markdownStrings)
+                if (document.blocks.any { block ->
+                        block.type == "barcode" &&
+                            block.value.orEmpty().toByteArray(Charsets.UTF_8).size > MAX_BARCODE_BYTES
+                    }
+                ) {
+                    throw RpkBuildException(
+                        context.getString(R.string.error_barcode_too_long, MAX_BARCODE_BYTES),
+                    )
+                }
                 put(JSONObject().put("blocks", JSONArray(document.blocksJson())))
             }
         }.toString()

@@ -273,6 +273,39 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                         [
                             [
                                 0,
+                                "qrcode"
+                            ]
+                        ],
+                        {
+                            width: "320px",
+                            height: "320px",
+                            flexShrink: 0,
+                            alignSelf: "center",
+                            marginBottom: "20px",
+                            color: "#000000",
+                            backgroundColor: "#ffffff"
+                        }
+                    ],
+                    [
+                        [
+                            [
+                                0,
+                                "barcode"
+                            ]
+                        ],
+                        {
+                            width: "100%",
+                            height: "160px",
+                            flexShrink: 0,
+                            marginBottom: "20px",
+                            color: "#000000",
+                            backgroundColor: "#ffffff"
+                        }
+                    ],
+                    [
+                        [
+                            [
+                                0,
                                 "strong"
                             ]
                         ],
@@ -677,43 +710,98 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                                                     }
                                                 }, function($idx, block) {
                                                     return [
-                                                        aiot.__ce__("text", {
+                                                        aiot.__ci__({
                                                             __vm__: _vm_,
                                                             __opts__: {
-                                                                classList: function() {
-                                                                    const $classValue$ = "content " + block.type;
-                                                                    if ('string' == typeof $classValue$) return $classValue$.split(' ').map((item)=>item.trim()).filter(Boolean);
-                                                                    return $classValue$;
+                                                                shown: function() {
+                                                                    return "qrcode" === block.type;
                                                                 }
                                                             }
-                                                        }, [
-                                                            aiot.__cf__({
-                                                                __vm__: _vm_,
-                                                                __opts__: {
-                                                                    exp: function() {
-                                                                        return block.segments;
-                                                                    },
-                                                                    key: "$idx",
-                                                                    value: "segment"
+                                                        }, function() {
+                                                            return [
+                                                                aiot.__ce__("qrcode", {
+                                                                    __vm__: _vm_,
+                                                                    __opts__: {
+                                                                        classList: [
+                                                                            "qrcode"
+                                                                        ],
+                                                                        value: function() {
+                                                                            return block.value;
+                                                                        }
+                                                                    }
+                                                                }, [])
+                                                            ];
+                                                        }),
+                                                        aiot.__ci__({
+                                                            __vm__: _vm_,
+                                                            __opts__: {
+                                                                shown: function() {
+                                                                    return "qrcode" !== block.type && "barcode" === block.type;
                                                                 }
-                                                            }, function($idx, segment) {
-                                                                return [
-                                                                    aiot.__ce__("span", {
+                                                            }
+                                                        }, function() {
+                                                            return [
+                                                                aiot.__ce__("barcode", {
+                                                                    __vm__: _vm_,
+                                                                    __opts__: {
+                                                                        classList: [
+                                                                            "barcode"
+                                                                        ],
+                                                                        value: function() {
+                                                                            return block.value;
+                                                                        }
+                                                                    }
+                                                                }, [])
+                                                            ];
+                                                        }),
+                                                        aiot.__ci__({
+                                                            __vm__: _vm_,
+                                                            __opts__: {
+                                                                shown: function() {
+                                                                    return "barcode" !== block.type && "qrcode" !== block.type;
+                                                                }
+                                                            }
+                                                        }, function() {
+                                                            return [
+                                                                aiot.__ce__("text", {
+                                                                    __vm__: _vm_,
+                                                                    __opts__: {
+                                                                        classList: function() {
+                                                                            const $classValue$ = "content " + block.type;
+                                                                            if ('string' == typeof $classValue$) return $classValue$.split(' ').map((item)=>item.trim()).filter(Boolean);
+                                                                            return $classValue$;
+                                                                        }
+                                                                    }
+                                                                }, [
+                                                                    aiot.__cf__({
                                                                         __vm__: _vm_,
                                                                         __opts__: {
-                                                                            classList: function() {
-                                                                                const $classValue$ = segment.style;
-                                                                                if ('string' == typeof $classValue$) return $classValue$.split(' ').map((item)=>item.trim()).filter(Boolean);
-                                                                                return $classValue$;
+                                                                            exp: function() {
+                                                                                return block.segments;
                                                                             },
-                                                                            value: function() {
-                                                                                return segment.text;
-                                                                            }
+                                                                            key: "$idx",
+                                                                            value: "segment"
                                                                         }
-                                                                    }, [])
-                                                                ];
-                                                            })
-                                                        ])
+                                                                    }, function($idx, segment) {
+                                                                        return [
+                                                                            aiot.__ce__("span", {
+                                                                                __vm__: _vm_,
+                                                                                __opts__: {
+                                                                                    classList: function() {
+                                                                                        const $classValue$ = segment.style;
+                                                                                        if ('string' == typeof $classValue$) return $classValue$.split(' ').map((item)=>item.trim()).filter(Boolean);
+                                                                                        return $classValue$;
+                                                                                    },
+                                                                                    value: function() {
+                                                                                        return segment.text;
+                                                                                    }
+                                                                                }
+                                                                            }, [])
+                                                                        ];
+                                                                    })
+                                                                ])
+                                                            ];
+                                                        })
                                                     ];
                                                 })
                                             ])

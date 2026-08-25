@@ -21,6 +21,7 @@
     <string name="error_no_notes">Добавьте хотя бы одну заметку.</string>
     <string name="error_empty_note">Каждая заметка должна содержать текст.</string>
     <string name="error_notes_too_large">Общий размер заметок превышает 1 МБ.</string>
+    <string name="error_barcode_too_long">Значение штрихкода не должно превышать %1$d байт.</string>
     <string name="error_invalid_rpk_template">Некорректный встроенный RPK-шаблон.</string>
     <string name="settings_title">Настройки</string>
     <string name="install_without_questions">Устанавливать без вопросов</string>

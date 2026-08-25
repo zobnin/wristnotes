@@ -13,6 +13,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.execbit.rpker.rpk.MarkdownRenderer
 import org.execbit.rpker.rpk.MarkdownStrings
+import org.execbit.rpker.rpk.RpkBuildException
 import org.execbit.rpker.rpk.RpkBuilder
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -65,6 +66,8 @@ class RpkBuilderInstrumentedTest {
             assertTrue(page.contains("currentNumber"))
             assertTrue(page.contains("exitApp"))
             assertTrue(page.contains("this.\$app.exit()"))
+            assertTrue(page.contains("aiot.__ce__(\"qrcode\""))
+            assertTrue(page.contains("aiot.__ce__(\"barcode\""))
             assertTrue(page.contains("width: \"220px\""))
             assertTrue(page.contains("height: \"128px\""))
             assertTrue(page.contains("paddingTop: \"48px\""))
@@ -139,6 +142,58 @@ class RpkBuilderInstrumentedTest {
             "  first line\n    second line  ",
             codeBlock.segments.joinToString(separator = "") { it.text },
         )
+    }
+
+    @Test
+    fun rendersFencedQrAndBarcodeBlocksForNativeVelaComponents() {
+        val document = MarkdownRenderer.render(
+            """
+            ```qrcode
+            https://example.com/ticket/42
+            ```
+
+            ```barcode
+            ABC-123
+            ```
+
+            ```kotlin
+            val answer = 42
+            ```
+            """.trimIndent(),
+            MarkdownStrings(defaultImageAlt = "image", imageLabel = "Image"),
+        )
+
+        val qrCode = document.blocks.single { it.type == "qrcode" }
+        val barcode = document.blocks.single { it.type == "barcode" }
+        val code = document.blocks.single { it.type == "code-block" }
+
+        assertEquals("https://example.com/ticket/42", qrCode.value)
+        assertEquals("ABC-123", barcode.value)
+        assertEquals(null, code.value)
+        assertEquals("val answer = 42", code.segments.joinToString("") { it.text })
+
+        val json = org.json.JSONArray(document.blocksJson())
+        assertEquals("https://example.com/ticket/42", json.getJSONObject(0).getString("value"))
+        assertEquals("ABC-123", json.getJSONObject(1).getString("value"))
+        assertFalse(json.getJSONObject(2).has("value"))
+    }
+
+    @Test
+    fun rejectsBarcodeValuesOverTheNativeTwentyByteLimit() {
+        val elevenCyrillicCharacters = "Б".repeat(11)
+        val error = runCatching {
+            RpkBuilder(context).build(
+                listOf(
+                    Note(
+                        id = "long-barcode",
+                        markdown = "```barcode\n$elevenCyrillicCharacters\n```",
+                    ),
+                ),
+            )
+        }.exceptionOrNull()
+
+        assertTrue(error is RpkBuildException)
+        assertTrue(error?.message.orEmpty().contains("20"))
     }
 
     @Test

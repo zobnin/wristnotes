@@ -72,7 +72,22 @@ Supported formatting includes:
 - ordered, unordered, and nested lists;
 - block quotes;
 - links;
+- QR codes and Code 128 barcodes;
 - horizontal rules.
+
+QR codes and barcodes use the conventional fenced-code extension pattern also used by Markdown extensions such as Mermaid. The content between the fences becomes the native VelaOS component value:
+
+````markdown
+```qrcode
+https://example.com/ticket/42
+```
+
+```barcode
+ABC-123
+```
+````
+
+Barcode values use Code 128 and may contain at most 20 UTF-8 bytes, matching the VelaOS component limit. Other fenced language identifiers remain ordinary code blocks.
 
 Markdown images are not downloaded or rendered as bitmaps. Their alt text and source URL are converted to a textual description instead.
 

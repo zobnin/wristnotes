@@ -7,9 +7,13 @@
       <div class="note-page" for="note in notes">
         <scroll class="text-scroll" scroll-y="true" bounces="true">
           <div class="document">
-            <text class="content {{ block.type }}" for="block in note.blocks">
-              <span class="{{ segment.style }}" for="segment in block.segments">{{ segment.text }}</span>
-            </text>
+            <block for="block in note.blocks">
+              <qrcode if="{{ block.type === 'qrcode' }}" class="qrcode" value="{{ block.value }}"></qrcode>
+              <barcode elif="{{ block.type === 'barcode' }}" class="barcode" value="{{ block.value }}"></barcode>
+              <text else class="content {{ block.type }}">
+                <span class="{{ segment.style }}" for="segment in block.segments">{{ segment.text }}</span>
+              </text>
+            </block>
           </div>
         </scroll>
       </div>
@@ -155,6 +159,25 @@ export default {
 .rule {
   color: #7e8796;
   text-align: center;
+}
+
+.qrcode {
+  width: 320px;
+  height: 320px;
+  flex-shrink: 0;
+  align-self: center;
+  margin-bottom: 20px;
+  color: #000000;
+  background-color: #ffffff;
+}
+
+.barcode {
+  width: 100%;
+  height: 160px;
+  flex-shrink: 0;
+  margin-bottom: 20px;
+  color: #000000;
+  background-color: #ffffff;
 }
 
 .strong {

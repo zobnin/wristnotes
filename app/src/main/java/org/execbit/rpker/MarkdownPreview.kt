@@ -38,6 +38,6 @@ private fun previewSpanStyle(style: String): SpanStyle? = when (style) {
 private fun previewBlockStyle(type: String): SpanStyle? = when (type) {
     "heading1", "heading2", "heading3" -> SpanStyle(fontWeight = FontWeight.Bold)
     "quote" -> SpanStyle(fontStyle = FontStyle.Italic)
-    "code-block" -> SpanStyle(fontFamily = FontFamily.Monospace)
+    "code-block", "qrcode", "barcode" -> SpanStyle(fontFamily = FontFamily.Monospace)
     else -> null
 }
