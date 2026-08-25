@@ -68,6 +68,8 @@ class RpkBuilderInstrumentedTest {
             assertTrue(page.contains("this.\$app.exit()"))
             assertTrue(page.contains("aiot.__ce__(\"qrcode\""))
             assertTrue(page.contains("aiot.__ce__(\"barcode\""))
+            assertTrue(page.contains("height: \"480px\""))
+            assertTrue(page.contains("height: \"336px\""))
             assertTrue(page.contains("width: \"220px\""))
             assertTrue(page.contains("height: \"128px\""))
             assertTrue(page.contains("paddingTop: \"48px\""))

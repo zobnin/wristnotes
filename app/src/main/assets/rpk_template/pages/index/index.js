@@ -107,8 +107,8 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                         {
                             width: "100%",
                             height: "100%",
-                            paddingLeft: "36px",
-                            paddingRight: "36px",
+                            paddingLeft: 0,
+                            paddingRight: 0,
                             paddingTop: "24px",
                             paddingBottom: "24px",
                             flexDirection: "column"
@@ -277,10 +277,9 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                             ]
                         ],
                         {
-                            width: "320px",
-                            height: "320px",
+                            width: "100%",
+                            height: "480px",
                             flexShrink: 0,
-                            alignSelf: "center",
                             marginBottom: "20px",
                             color: "#000000",
                             backgroundColor: "#ffffff"
@@ -396,6 +395,20 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                         [
                             [
                                 0,
+                                "qrcode"
+                            ]
+                        ],
+                        {
+                            height: "336px"
+                        }
+                    ],
+                    [
+                        {
+                            condition: "screen and (shape:circle)"
+                        },
+                        [
+                            [
+                                0,
                                 "counter-bar"
                             ]
                         ],
@@ -443,8 +456,8 @@ export default function(global, globalThis, window, $app_exports$, $app_evaluate
                             ]
                         ],
                         {
-                            paddingLeft: "24px",
-                            paddingRight: "24px",
+                            paddingLeft: 0,
+                            paddingRight: 0,
                             paddingTop: "48px",
                             paddingBottom: "48px"
                         }
